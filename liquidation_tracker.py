@@ -5,9 +5,19 @@ import json
 import pandas as pd
 import pytz
 import threading
+from flask import Flask, render_template
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent", logger=True, engineio_logger=True)
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 5000))  # Heroku provides the PORT environment variable
+    app.run(host="0.0.0.0", port=port)
 
 # Existing Binance WebSocket
 binance_socket = 'wss://fstream.binance.com/ws/!forceOrder@arr'
