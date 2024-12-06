@@ -1,5 +1,6 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from flask_socketio import SocketIO, emit
+from flask_cors import CORS
 import websocket
 import json
 import pandas as pd
@@ -7,9 +8,10 @@ import pytz
 import threading
 
 app = Flask(__name__)
+CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent", logger=True, engineio_logger=True)
 
-# WebSocket URLs for Binance, Kraken, Coinbase, and OKX
+# WebSocket URLs for exchanges
 binance_socket = 'wss://fstream.binance.com/ws/!forceOrder@arr'
 kraken_socket = 'wss://ws.kraken.com'
 coinbase_socket = 'wss://ws-feed.pro.coinbase.com'
@@ -27,7 +29,6 @@ def on_message(ws, message):
         new_row = None
 
         if source == 'Binance':
-            # Binance-specific parsing
             order_data = data['o']
             trade_time = pd.to_datetime(order_data['T'], unit='ms', utc=True)
             tz = pytz.timezone('Asia/Seoul')
@@ -43,7 +44,6 @@ def on_message(ws, message):
             }
 
         elif source == 'Kraken':
-            # Kraken-specific parsing
             if isinstance(data, list) and len(data) > 3 and data[2] == 'trade':
                 trades = data[1]
                 for t in trades:
@@ -66,7 +66,6 @@ def on_message(ws, message):
                     break
 
         elif source == 'Coinbase':
-            # Coinbase-specific parsing
             if data.get('type') == 'match':
                 side = 'Buy' if data['side'] == 'buy' else 'Sell'
                 price = float(data['price'])
@@ -85,7 +84,6 @@ def on_message(ws, message):
                 }
 
         elif source == 'OKX':
-            # OKX-specific parsing
             if 'data' in data and isinstance(data['data'], list) and data['data']:
                 t = data['data'][0]
                 price = float(t['px'])
@@ -150,7 +148,7 @@ def on_open_okx(ws):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return jsonify({"status": "Backend is running!"})
 
 def start_ws():
     # Binance
