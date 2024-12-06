@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, jsonify
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 import websocket
@@ -6,6 +6,7 @@ import json
 import pandas as pd
 import pytz
 import threading
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -21,10 +22,10 @@ okx_socket = 'wss://ws.okx.com:8443/ws/v5/public'
 minimum_total_dollars = 0
 set_ticker = None
 
-# WebSocket handler
 def on_message(ws, message):
+    source = getattr(ws, 'exchange_name', 'Unknown')
     try:
-        source = getattr(ws, 'exchange_name', 'Unknown')
+        print(f"Raw message from {source}: {message}")  # Debugging raw data
         data = json.loads(message)
         new_row = None
 
@@ -107,6 +108,7 @@ def on_message(ws, message):
             if (set_ticker is None or new_row['Symbol'] in set_ticker) and \
                (minimum_total_dollars is None or new_row['Total($)'] >= minimum_total_dollars):
                 socketio.emit('liquidation_update', new_row)
+                print(f"Emitted: {new_row}")  # Debugging emitted data
 
     except Exception as e:
         print(f"Error processing message from {source}: {e}")
