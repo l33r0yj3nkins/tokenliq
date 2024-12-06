@@ -1,1 +1,1 @@
-web: python liquidation_tracker.py
+web: python app.py
