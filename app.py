@@ -19,7 +19,7 @@ coinbase_socket = 'wss://ws-feed.pro.coinbase.com'
 okx_socket = 'wss://ws.okx.com:8443/ws/v5/public'
 
 # Filters
-minimum_total_dollars = 0
+minimum_total_dollars = 500
 set_ticker = None
 
 def on_message(ws, message):

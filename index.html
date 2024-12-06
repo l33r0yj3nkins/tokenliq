@@ -229,7 +229,7 @@
         // Initial fetch on page load
         fetchCryptoPrices();
 
-        const socket = io("http://localhost:5000");
+        const socket = io("https://liqaiagent-60ce35efb88d.herokuapp.com/");
 
         socket.on("connect", () => {
             console.log("Connected to WebSocket server");
